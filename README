@@ -2,7 +2,6 @@ cd cnij...deb
 sudo ./install.sh
 
 sudo apt-get -f install
-sudo apt-get install m4 autoconf autotools-dev automake
+sudo apt-get install m4 autoconf autotools-dev automake libtool
 
-cd cnijfilter/backend
-sudo make install
+sudo cp cnijusb /usr/lib/cups/backend
