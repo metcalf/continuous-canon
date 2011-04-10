@@ -1,2 +1,7 @@
 Install the printer using the included deb package
-sudo make install the new backend
+cd cnij...
+sudo ./install.sh
+
+install the new backend
+cd backend
+
