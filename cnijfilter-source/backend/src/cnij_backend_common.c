@@ -42,6 +42,7 @@
 // Header file for CANON
 #include "cnij_backend_common.h"
 #include "cnij_common_function.h"
+#include "piped_writer.c"
 
 
 /*--------- Prototypes.	*/
@@ -337,8 +338,15 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 				tbytes;						/* Total number of bytes written*/
 	char		buffer[LGMON_DATA_WRITE_STR_LEN],		/* Output buffer	*/
 				*bufptr;    				/* Pointer into buffer			*/
-
-	while (copies > 0) {
+    
+    pipes_struct pipes = get_write_pipes();
+    FILE *dbg;
+    
+    dbg = fopen("/home/andrew/test.txt", "w+");
+    fprintf(dbg, "Starting top\n");
+    fclose(dbg);
+    
+    while (copies > 0) {
 
 		copies --;
 
@@ -356,33 +364,36 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 		/*
 		*	data read
 		*/
+        int read_total = 0;
+        int write_total = 0;
+        
 		while ((nbytes = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
 
 			if( g_signal != 0 )			/* signal(SIGTERM) writing end. */
 				break;
-
+            
+            dbg = fopen("/home/andrew/test.txt", "a");
+            read_total += nbytes;
+            fprintf(dbg, "Read %d in %d\n", nbytes, read_total);
+            fclose(dbg);
+            
 			/*
 			* Write the print data to the printer...
 			*/
 			tbytes += nbytes;
 			bufptr = buffer;
 
-			while (nbytes > 0) {
-				if ((wbytes = write(pipe_fds, bufptr, nbytes)) < 0)
-					if (errno == ENOTTY)			/* retry. 				*/
-						wbytes = write(pipe_fds, bufptr, nbytes);
+            wbytes = write_piped(pipes, pipe_fds, bufptr, nbytes);
 
-				if (wbytes < 0) {					/* write error			*/
-					perror("ERROR: Unable to send print file to printer");
-					break;
-				}
-
-				nbytes -= wbytes;
-				bufptr += wbytes;
-
-				if( g_signal != 0 )		/* signal(SIGTERM) writing end. */
-					break;
-			}
+            dbg = fopen("/home/andrew/test.txt", "a");
+            write_total += nbytes;
+            fprintf(dbg, "Wrote %d in %d\n", wbytes, write_total);
+            fclose(dbg);
+            
+            if (wbytes < 0) {					/* write error			*/
+                perror("ERROR: Unable to send print file to printer");
+                break;
+            }
 
 			/*---------------------------------------------------------------*
 			*	mixture of the printer status by lgmon is prevented.
@@ -392,12 +403,20 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 			}
 			-----------------------------------------------------------------*/
 		}
+        
+        dbg = fopen("/home/andrew/test.txt", "a");
+        fprintf(dbg, "Copy done %d\n", wbytes);
+        fclose(dbg);
 
 		if( g_signal != 0 )				/* signal(SIGTERM) writing end. */
 			break;
 
 	} /* while end */
-
+    
+    dbg = fopen("/home/andrew/test.txt", "a");
+        fprintf(dbg, "Copies done %d\n", wbytes);
+        fclose(dbg);
+    
 	if( g_signal != 0 ) {
 		fprintf( stderr, "%s %s %s\n", message_str_base[INFO_MASSAGE],
                                     sts_message_str[CANON_STS_DEFAULT],
