@@ -1,1 +1,0 @@
-/mnt/hgfs/Shared/piped_writer.h
