@@ -72,6 +72,7 @@ class PipeThread(threading.Thread):
             
             iteration = 0
             done = False
+            finish = False
             while(not done and not self._kill):
                 print "reading"
                 data = self.pipe_controller.read()
@@ -82,14 +83,15 @@ class PipeThread(threading.Thread):
                         self.fed.wait()
                         if self._kill:
                             return
-                    elif len(data) < 8192:
-                        self.pipe_controller.write(data[:-64])
+                    elif len(data) == 64:
                         self.wait_clear.set()
                         self.cleared.wait()
                         if self._kill:
                             return
-                        data = data[-64:]
                         done = True
+                    elif len(data) < 8192:
+                        data = data[:-64]
+
                     print "writing"
                     self.pipe_controller.write(data)
                     print "written"
