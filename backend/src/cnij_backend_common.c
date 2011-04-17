@@ -42,7 +42,6 @@
 // Header file for CANON
 #include "cnij_backend_common.h"
 #include "cnij_common_function.h"
-#include "piped_writer.c"
 
 
 /*--------- Prototypes.	*/
@@ -311,7 +310,7 @@ int		lgmon_exec( int argc, FILE *fp, int fd, char *command, int copies  ) {
 			exit(0) ;
 		}
 	}
-	else {										/* parents process			*/
+	else {			
 		close( pipe_fds[0] ) ;					/* pipe(in) close           */
 		data_write( argc, fp, copies, pipe_fds[1] ) ;		/* data write 	*/
 		close( pipe_fds[1] ) ;					/* pipe(out) close          */
@@ -322,8 +321,6 @@ int		lgmon_exec( int argc, FILE *fp, int fd, char *command, int copies  ) {
 	if	( g_pid > 0 ) {				/* if child process has started....	*/
 		waitpid( g_pid, NULL, 0) ;		/* child process wait		*/
 	}
-
-	return( CANON_STS_SUCCESS ) ;
 }
 
 /*----------------------------------------------------------------------------*
@@ -336,17 +333,19 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 	int			wbytes;     				/* Number of bytes written		*/
 	size_t		nbytes,     				/* Number of bytes read			*/
 				tbytes;						/* Total number of bytes written*/
+                pbytes;                     /* Pipe bytes read */
 	char		buffer[LGMON_DATA_WRITE_STR_LEN],		/* Output buffer	*/
-				*bufptr;    				/* Pointer into buffer			*/
-    
-    pipes_struct pipes = get_write_pipes();
+                pipebuffer[LGMON_DATA_WRITE_STR_LEN],
+                *pipebufptr,
+				*bufptr; /* Pointer into buffer */ 
     FILE *dbg;
-    
-    dbg = fopen("/home/andrew/test.txt", "w+");
+    dbg = fopen("/home/andrew/test.txt","w+");
     fprintf(dbg, "Starting top\n");
     fclose(dbg);
     
-    while (copies > 0) {
+    pipes_struct pipes = get_write_pipes();
+    
+	while (copies > 0) {
 
 		copies --;
 
@@ -364,37 +363,58 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 		/*
 		*	data read
 		*/
-        int read_total = 0;
-        int write_total = 0;
-        
 		while ((nbytes = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
 
 			if( g_signal != 0 )			/* signal(SIGTERM) writing end. */
 				break;
             
-            dbg = fopen("/home/andrew/test.txt", "a");
-            read_total += nbytes;
-            fprintf(dbg, "Read %d in %d\n", nbytes, read_total);
+            dbg = fopen("/home/andrew/test.txt","a");
+            fprintf(dbg, "Read %d\n", nbytes);
             fclose(dbg);
-            
 			/*
 			* Write the print data to the printer...
 			*/
-			tbytes += nbytes;
-			bufptr = buffer;
-
-            wbytes = write_piped(pipes, pipe_fds, bufptr, nbytes);
-
-            dbg = fopen("/home/andrew/test.txt", "a");
-            write_total += nbytes;
-            fprintf(dbg, "Wrote %d in %d\n", wbytes, write_total);
-            fclose(dbg);
+            tbytes += nbytes;
+            pipebufptr = buffer;
+            pbytes = nbytes;
             
-            if (wbytes < 0) {					/* write error			*/
-                perror("ERROR: Unable to send print file to printer");
-                break;
-            }
+            while(pbytes > 0){
+                nbytes = piped_transform(pipes, pipebufptr, pipebuffer, pbytes)
+                
+                if (nbytes < 0) {					/* write error			*/
+                    perror("ERROR: Unable to send print file to printer");
+                    break;
+                }
+                
+                pbytes -= nbytes;
+                pipebufptr += nbytes;
+                bufptr = pipebuffer;
+                
+                dbg = fopen("/home/andrew/test.txt","a");
+                fprintf(dbg, "Transformed %d\n", nbytes);
+                fclose(dbg);
+                
+                while (nbytes > 0) {
+                    if ((wbytes = write(pipe_fds, bufptr, nbytes)) < 0)
+                        if (errno == ENOTTY)			/* retry. 				*/
+                            wbytes = write(pipe_fds, bufptr, nbytes);
 
+                    if (wbytes < 0) {					/* write error			*/
+                        perror("ERROR: Unable to send print file to printer");
+                        break;
+                    }
+                    fwrite(bufptr, 1, wbytes, dbg);
+                    nbytes -= wbytes;
+                    bufptr += wbytes;
+
+                    if( g_signal != 0 )		/* signal(SIGTERM) writing end. */
+                        break;
+                }
+                
+                dbg = fopen("/home/andrew/test.txt","a");
+                fprintf(dbg, "Wrote %d\n");
+                fclose(dbg);
+            }
 			/*---------------------------------------------------------------*
 			*	mixture of the printer status by lgmon is prevented.
 			*
@@ -403,20 +423,12 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 			}
 			-----------------------------------------------------------------*/
 		}
-        
-        dbg = fopen("/home/andrew/test.txt", "a");
-        fprintf(dbg, "Copy done %d\n", wbytes);
-        fclose(dbg);
 
 		if( g_signal != 0 )				/* signal(SIGTERM) writing end. */
 			break;
 
 	} /* while end */
-    
-    dbg = fopen("/home/andrew/test.txt", "a");
-        fprintf(dbg, "Copies done %d\n", wbytes);
-        fclose(dbg);
-    
+    fclose(dbg);
 	if( g_signal != 0 ) {
 		fprintf( stderr, "%s %s %s\n", message_str_base[INFO_MASSAGE],
                                     sts_message_str[CANON_STS_DEFAULT],
