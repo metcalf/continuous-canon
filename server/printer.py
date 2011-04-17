@@ -2,6 +2,7 @@ import feedparser
 import urllib2
 import datetime
 import signal
+import Image
 
 from subprocess import call
 
@@ -67,6 +68,7 @@ def get_dd():
         except ValueError:
             continue
         
+        
         path = PATH_BASE%(str(datetime.datetime.now().strftime("%Y%m%dT%H%M%S")), ext)
         try:
             data = urllib2.urlopen(url).read()
@@ -78,6 +80,10 @@ def get_dd():
             f.write(data)
         finally:
             f.close()
+         
+        if "dpi" not in Image.open(path).info:
+            continue
+
         return path
     
     return None    
