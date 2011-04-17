@@ -19,9 +19,9 @@ pipes_struct get_write_pipes(){
 }
 
 int piped_transform(pipes_struct pipes, char* readptr, char* writeptr, int nbytes){
-    int wbytes;
+    int wbytes, rbytes;
     
-    wbytes = write(write_pipe, readptr, nbytes);
+    wbytes = write(pipes.writer, readptr, nbytes);
     if(wbytes < nbytes){
         return -1;
     }

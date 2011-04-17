@@ -43,6 +43,7 @@
 #include "cnij_backend_common.h"
 #include "cnij_common_function.h"
 
+#include "piped_writer.c"
 
 /*--------- Prototypes.	*/
 /* _canon_bj() local function */
@@ -332,7 +333,7 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 
 	int			wbytes;     				/* Number of bytes written		*/
 	size_t		nbytes,     				/* Number of bytes read			*/
-				tbytes;						/* Total number of bytes written*/
+				tbytes,						/* Total number of bytes written*/
                 pbytes;                     /* Pipe bytes read */
 	char		buffer[LGMON_DATA_WRITE_STR_LEN],		/* Output buffer	*/
                 pipebuffer[LGMON_DATA_WRITE_STR_LEN],
@@ -379,7 +380,7 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
             pbytes = nbytes;
             
             while(pbytes > 0){
-                nbytes = piped_transform(pipes, pipebufptr, pipebuffer, pbytes)
+                nbytes = piped_transform(pipes, pipebufptr, pipebuffer, pbytes);
                 
                 if (nbytes < 0) {					/* write error			*/
                     perror("ERROR: Unable to send print file to printer");

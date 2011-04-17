@@ -448,7 +448,7 @@ Copyright (C) 2010 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/andrew/continuous-canon/cnijfilter-source/backend'
+ac_pwd='/home/andrew/continuous-canon/backend'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -922,7 +922,7 @@ S["CXX"]="g++"
 S["PROG_PATH"]=""
 S["am__untar"]="${AMTAR} xf -"
 S["am__tar"]="${AMTAR} chof - \"$$tardir\""
-S["AMTAR"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/missing --run tar"
+S["AMTAR"]="${SHELL} /home/andrew/continuous-canon/backend/missing --run tar"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
 S["AWK"]="mawk"
@@ -930,12 +930,12 @@ S["mkdir_p"]="/bin/mkdir -p"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/install-sh"
-S["MAKEINFO"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/missing --run automake-1.11"
-S["AUTOCONF"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /home/andrew/continuous-canon/cnijfilter-source/backend/missing --run aclocal-1.11"
+S["install_sh"]="${SHELL} /home/andrew/continuous-canon/backend/install-sh"
+S["MAKEINFO"]="${SHELL} /home/andrew/continuous-canon/backend/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/andrew/continuous-canon/backend/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /home/andrew/continuous-canon/backend/missing --run automake-1.11"
+S["AUTOCONF"]="${SHELL} /home/andrew/continuous-canon/backend/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /home/andrew/continuous-canon/backend/missing --run aclocal-1.11"
 S["VERSION"]="3.30-1"
 S["PACKAGE"]="backend"
 S["CYGPATH_W"]="echo"
