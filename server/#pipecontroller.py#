@@ -23,6 +23,7 @@ class PipeController(object):
 
         self.reader_fd = os.open(self.in_name, os.O_NONBLOCK)
         self.writer_fd = os.open(self.out_name, os.O_WRONLY)
+        print "pipes open"
     
     def close_pipes(self):
         if self.reader_fd:
@@ -89,7 +90,9 @@ class PipeThread(threading.Thread):
                     elif len(data) < 8192:
                         data = data[:-64]
 
+                    print "writing"
                     self.pipe_controller.write(data)
+                    print "written"
                     data = ""
                     iteration += 1
             

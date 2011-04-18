@@ -339,12 +339,8 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
                 pipebuffer[LGMON_DATA_WRITE_STR_LEN],
                 *pipebufptr,
 				*bufptr; /* Pointer into buffer */ 
-    FILE *dbg;
-    dbg = fopen("/home/andrew/test.txt","w+");
-    fprintf(dbg, "Starting top\n");
-    fclose(dbg);
     
-    pipes_struct pipes = get_write_pipes();
+        pipes_struct pipes = get_write_pipes();
     
 	while (copies > 0) {
 
@@ -356,6 +352,7 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 			*
 			fputs( "PAGE: 1 1\n", stderr ) ;
 			-----------------------------------------------------------------*/
+
 			rewind(fp);
 		}
 
@@ -369,9 +366,6 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 			if( g_signal != 0 )			/* signal(SIGTERM) writing end. */
 				break;
             
-            dbg = fopen("/home/andrew/test.txt","a");
-            fprintf(dbg, "Read %d\n", nbytes);
-            fclose(dbg);
 			/*
 			* Write the print data to the printer...
 			*/
@@ -391,10 +385,6 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
                 pipebufptr += nbytes;
                 bufptr = pipebuffer;
                 
-                dbg = fopen("/home/andrew/test.txt","a");
-                fprintf(dbg, "Transformed %d\n", nbytes);
-                fclose(dbg);
-                
                 while (nbytes > 0) {
                     if ((wbytes = write(pipe_fds, bufptr, nbytes)) < 0)
                         if (errno == ENOTTY)			/* retry. 				*/
@@ -404,7 +394,7 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
                         perror("ERROR: Unable to send print file to printer");
                         break;
                     }
-                    fwrite(bufptr, 1, wbytes, dbg);
+
                     nbytes -= wbytes;
                     bufptr += wbytes;
 
@@ -412,9 +402,6 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
                         break;
                 }
                 
-                dbg = fopen("/home/andrew/test.txt","a");
-                fprintf(dbg, "Wrote %d\n");
-                fclose(dbg);
             }
 			/*---------------------------------------------------------------*
 			*	mixture of the printer status by lgmon is prevented.
@@ -429,7 +416,7 @@ void	data_write( int argc, FILE *fp, int copies, int pipe_fds )
 			break;
 
 	} /* while end */
-    fclose(dbg);
+
 	if( g_signal != 0 ) {
 		fprintf( stderr, "%s %s %s\n", message_str_base[INFO_MASSAGE],
                                     sts_message_str[CANON_STS_DEFAULT],
