@@ -74,7 +74,6 @@ class PipeThread(threading.Thread):
             done = False
             finish = False
             while(not done and not self._kill):
-                print "reading"
                 data = self.pipe_controller.read()
                 if data and len(data) > 0:
                     print "read %s"%data
